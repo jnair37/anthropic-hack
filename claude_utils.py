@@ -23,7 +23,7 @@ def call_claude(prompt, system_msg="You are a resume reviewer."):
             ]
         )
         # return just the useful part
-        return response.content 
+        return ''.join([block.text for block in response.content if block.type == "text"])
     except Exception as e:
         print(f"[Claude error] {e}")
         return "Claude is not responding right now. Please try again."
