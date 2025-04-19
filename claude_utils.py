@@ -2,6 +2,7 @@
 import anthropic
 import os
 from dotenv import load_dotenv
+from prompts import feedback_prompt
 
 # loading the .env file where your key is stored
 load_dotenv()
@@ -10,7 +11,7 @@ load_dotenv()
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # helper function to send prompt and get a response
-def call_claude(prompt, system_msg="You are a resume reviewer."):
+def call_claude(prompt, system_msg="You are a resume reviewer. Also, we know the resume is redacted so ignore that."):
     try:
         # claude message call (you can change model, temp, etc.)
         response = client.messages.create(
@@ -27,3 +28,8 @@ def call_claude(prompt, system_msg="You are a resume reviewer."):
     except Exception as e:
         print(f"[Claude error] {e}")
         return "Claude is not responding right now. Please try again."
+    
+    
+def get_resume_feedback(resume_text):
+    prompt = feedback_prompt(resume_text)
+    return call_claude(prompt)
