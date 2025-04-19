@@ -37,7 +37,8 @@ def upload_pdf():
        
         # Create a response with the redacted text and statistics
         response = {
-            'redacted_text': redacted_text
+            'redacted_text': redacted_text,
+            'auto_switch_tab': True  # Flag to trigger automatic tab switch
         }
         
         return jsonify(response)
@@ -65,6 +66,29 @@ def download_redacted():
         os.remove(temp_file.name)
     
     return response
+
+
+@app.route('/process_with_claude', methods=['POST'])
+def process_with_claude():
+    redacted_text = request.form.get('redacted_text', '')
+    if not redacted_text:
+        return jsonify({'error': 'No text provided for processing'}), 400
+    
+    # Call the Claude wrapper function with the redacted text
+    try:
+        claude_response = call_claude_wrapper(redacted_text)
+        return jsonify({'claude_response': claude_response, 'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+def call_claude_wrapper(redacted_text):
+    """
+    Function to process redacted text with Claude API
+    This is a placeholder - implement the actual Claude API call here
+    """
+    # Implementation would go here - e.g., API call to Claude
+    return f"Claude's analysis of the redacted resume would appear here."
 
 
 if __name__ == '__main__':

@@ -1,148 +1,411 @@
 <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Resume Redaction Tool</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            .container { max-width: 800px; margin-top: 30px; }
-            #redacted-text { height: 400px; }
-            .hidden { display: none; }
-            .loading { text-align: center; padding: 20px; }
-            .spinner-border { width: 3rem; height: 3rem; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1 class="mb-4">Resume Redaction Tool</h1>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Redaction Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container {
+            max-width: 900px;
+            padding: 30px 15px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .card-header {
+            background-color: #4a89dc;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        .nav-tabs {
+            border-bottom: none;
+            padding: 0 10px;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            border-radius: 5px 5px 0 0;
+            padding: 10px 20px;
+            margin-right: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs .nav-link:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        .nav-tabs .nav-link.active {
+            color: #4a89dc;
+            background-color: white;
+            border-bottom: 3px solid #4a89dc;
+        }
+        .form-control {
+            border-radius: 6px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+        }
+        .btn-primary {
+            background-color: #4a89dc;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #3a70c0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        #textArea {
+            min-height: 300px;
+            font-family: monospace;
+        }
+        .custom-file-upload {
+            display: block;
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .custom-file-upload:hover {
+            border-color: #4a89dc;
+            background-color: #e9ecef;
+        }
+        .hidden {
+            display: none;
+        }
+        .spinner-border {
+            margin-right: 8px;
+        }
+        .alert {
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        #resultPane {
+            background-color: #f8f9fc;
+            border-radius: 6px;
+            padding: 15px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .tab-content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+        }
+        #claude-response {
+            padding: 15px;
+            background-color: #f0f4f8;
+            border-radius: 6px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Resume Redaction Tool</h2>
+            </div>
             
-            <div class="card mb-4">
-                <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">Upload Resume</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">Results</button>
-                        </li>
-                    </ul>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab" aria-controls="upload" aria-selected="true">Upload PDF</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="redact-tab" data-bs-toggle="tab" data-bs-target="#redact" type="button" role="tab" aria-controls="redact" aria-selected="false">Redacted Text</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="claude-tab" data-bs-toggle="tab" data-bs-target="#claude" type="button" role="tab" aria-controls="claude" aria-selected="false">Claude Analysis</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="myTabContent">
+                <!-- Upload Tab -->
+                <div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
+                    <div class="alert alert-info hidden" id="uploadAlert" role="alert"></div>
+                    <form id="uploadForm">
+                        <label for="pdfFileInput" class="custom-file-upload">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#6c757d" class="bi bi-file-earmark-pdf mb-3" viewBox="0 0 16 16">
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                                <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.09.346z"/>
+                            </svg>
+                            <h5>Click to select or drag and drop your PDF file</h5>
+                            <p class="text-muted">Maximum file size: 16MB</p>
+                        </label>
+                        <input type="file" id="pdfFileInput" name="pdf_file" accept=".pdf" class="hidden" required>
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary" id="uploadButton">
+                                <span class="spinner-border spinner-border-sm hidden" id="uploadSpinner" role="status" aria-hidden="true"></span>
+                                Upload and Redact
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="card-body">
-                    <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade show active" id="upload" role="tabpanel">
-                            <p class="card-text">Upload a resume PDF to redact personal information:</p>
-                            <form id="upload-form" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <input class="form-control" type="file" id="pdf-file" name="pdf_file" accept=".pdf">
-                                </div>
-                                <button type="submit" class="btn btn-primary">Process Resume</button>
-                            </form>
-                            
-                            <div id="loading" class="loading hidden">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                                <p class="mt-2">Processing PDF...</p>
+                
+                <!-- Redacted Text Tab -->
+                <div class="tab-pane fade" id="redact" role="tabpanel" aria-labelledby="redact-tab">
+                    <div class="alert alert-info hidden" id="redactAlert" role="alert"></div>
+                    <div class="mb-3">
+                        <label for="textArea" class="form-label">Redacted Text</label>
+                        <textarea class="form-control" id="textArea" rows="12"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-secondary" id="downloadButton">Download as Text</button>
+                        <button class="btn btn-primary" id="approveButton">Approve and Send to Claude</button>
+                    </div>
+                </div>
+                
+                <!-- Claude Analysis Tab -->
+                <div class="tab-pane fade" id="claude" role="tabpanel" aria-labelledby="claude-tab">
+                    <div class="alert alert-info hidden" id="claudeAlert" role="alert"></div>
+                    <div class="mb-3">
+                        <h4>Claude's Analysis</h4>
+                        <div id="claude-spinner" class="text-center my-5 hidden">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
                             </div>
+                            <p class="mt-3">Processing with Claude...</p>
                         </div>
-                        
-                        <div class="tab-pane fade" id="results" role="tabpanel">
-                            <div id="results-container">
-                                <div id="stats-container" class="mb-3">
-                                    <h4>Redaction Statistics</h4>
-                                    <div id="stats-content"></div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="redacted-text" class="form-label">Redacted Text</label>
-                                    <textarea class="form-control" id="redacted-text" readonly></textarea>
-                                </div>
-                                
-                                <button id="download-btn" class="btn btn-success">Download Redacted Text</button>
-                            </div>
-                        </div>
+                        <div id="claude-response" class="mt-3"></div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const uploadForm = document.getElementById('upload-form');
-                const pdfFileInput = document.getElementById('pdf-file');
-                const loadingDiv = document.getElementById('loading');
-                const resultsTab = document.getElementById('results-tab');
-                const redactedTextArea = document.getElementById('redacted-text');
-                const statsContent = document.getElementById('stats-content');
-                const downloadBtn = document.getElementById('download-btn');
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadForm = document.getElementById('uploadForm');
+            const pdfFileInput = document.getElementById('pdfFileInput');
+            const textArea = document.getElementById('textArea');
+            const uploadButton = document.getElementById('uploadButton');
+            const uploadSpinner = document.getElementById('uploadSpinner');
+            const downloadButton = document.getElementById('downloadButton');
+            const approveButton = document.getElementById('approveButton');
+            const uploadAlert = document.getElementById('uploadAlert');
+            const redactAlert = document.getElementById('redactAlert');
+            const claudeAlert = document.getElementById('claudeAlert');
+            const claudeResponse = document.getElementById('claude-response');
+            const claudeSpinner = document.getElementById('claude-spinner');
+            
+            // Tab elements
+            const uploadTab = document.getElementById('upload-tab');
+            const redactTab = document.getElementById('redact-tab');
+            const claudeTab = document.getElementById('claude-tab');
+            
+            // Bootstrap 5 tab objects
+            const uploadTabObj = new bootstrap.Tab(uploadTab);
+            const redactTabObj = new bootstrap.Tab(redactTab);
+            const claudeTabObj = new bootstrap.Tab(claudeTab);
+            
+            // Handle file selection UI
+            const customFileUpload = document.querySelector('.custom-file-upload');
+            customFileUpload.addEventListener('click', function() {
+                pdfFileInput.click();
+            });
+            
+            pdfFileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    customFileUpload.querySelector('h5').textContent = this.files[0].name;
+                    customFileUpload.style.borderColor = '#4a89dc';
+                }
+            });
+            
+            // Drag and drop handling
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                customFileUpload.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                customFileUpload.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                customFileUpload.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                customFileUpload.style.borderColor = '#4a89dc';
+                customFileUpload.style.backgroundColor = '#e9ecef';
+            }
+            
+            function unhighlight() {
+                customFileUpload.style.borderColor = '#ced4da';
+                customFileUpload.style.backgroundColor = '#f8f9fa';
+            }
+            
+            customFileUpload.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    pdfFileInput.files = files;
+                    customFileUpload.querySelector('h5').textContent = files[0].name;
+                }
+            }
+            
+            // Form submission
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                uploadForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const formData = new FormData();
-                    formData.append('pdf_file', pdfFileInput.files[0]);
-                    
-                    // Show loading spinner
-                    loadingDiv.classList.remove('hidden');
-                    
-                    fetch('/upload', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            alert(data.error);
-                            return;
-                        }
-                        
-                        // Hide loading spinner
-                        loadingDiv.classList.add('hidden');
-                        
-                        // Populate results
-                        redactedTextArea.value = data.redacted_text;
-                        
-                        // Populate statistics
-                        let statsHtml = `<p>Total items redacted: ${data.replacements_count}</p><ul>`;
-                        for (const [type, count] of Object.entries(data.type_counts)) {
-                            statsHtml += `<li>${type}: ${count} items</li>`;
-                        }
-                        statsHtml += '</ul>';
-                        statsContent.innerHTML = statsHtml;
-                        
-                        // Switch to results tab
-                        resultsTab.click();
-                    })
-                    .catch(error => {
-                        loadingDiv.classList.add('hidden');
-                        alert('An error occurred: ' + error);
-                    });
-                });
+                if (!pdfFileInput.files || pdfFileInput.files.length === 0) {
+                    showAlert(uploadAlert, 'Please select a PDF file first.', 'warning');
+                    return;
+                }
                 
-                downloadBtn.addEventListener('click', function() {
-                    const formData = new FormData();
-                    formData.append('text', redactedTextArea.value);
+                const formData = new FormData();
+                formData.append('pdf_file', pdfFileInput.files[0]);
+                
+                // Show loading state
+                uploadButton.disabled = true;
+                uploadSpinner.classList.remove('hidden');
+                uploadButton.textContent = ' Processing...';
+                uploadSpinner.parentNode.insertBefore(uploadSpinner, uploadButton.firstChild);
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
                     
-                    fetch('/download', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.style.display = 'none';
-                        a.href = url;
-                        a.download = 'redacted_text.txt';
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    })
-                    .catch(error => alert('Download failed: ' + error));
+                    // Update textarea with redacted text
+                    textArea.value = data.redacted_text;
+                    
+                    // Auto-switch to redact tab if flag is present
+                    if (data.auto_switch_tab) {
+                        redactTabObj.show();
+                    }
+                    
+                    showAlert(redactAlert, 'PDF successfully redacted! Review the text and approve or make changes.', 'success');
+                })
+                .catch(error => {
+                    showAlert(uploadAlert, 'Error: ' + error.message, 'danger');
+                })
+                .finally(() => {
+                    // Reset button state
+                    uploadButton.disabled = false;
+                    uploadSpinner.classList.add('hidden');
+                    uploadButton.textContent = 'Upload and Redact';
                 });
             });
-        </script>
-    </body>
-    </html>
+            
+            // Download button
+            downloadButton.addEventListener('click', function() {
+                const text = textArea.value;
+                
+                if (!text) {
+                    showAlert(redactAlert, 'No text to download.', 'warning');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('text', text);
+                
+                fetch('/download', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to download file');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'redacted_text.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    showAlert(redactAlert, 'Error: ' + error.message, 'danger');
+                });
+            });
+            
+            // Approve and process with Claude button
+            approveButton.addEventListener('click', function() {
+                const redactedText = textArea.value;
+                
+                if (!redactedText) {
+                    showAlert(redactAlert, 'No text to process.', 'warning');
+                    return;
+                }
+                
+                // Switch to Claude tab
+                claudeTabObj.show();
+                
+                // Show loading state
+                claudeSpinner.classList.remove('hidden');
+                claudeResponse.innerHTML = '';
+                
+                const formData = new FormData();
+                formData.append('redacted_text', redactedText);
+                
+                fetch('/process_with_claude', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error || 'An unknown error occurred');
+                    }
+                    
+                    // Display Claude's response
+                    claudeResponse.textContent = data.claude_response;
+                    showAlert(claudeAlert, 'Claude has analyzed your redacted resume!', 'success');
+                })
+                .catch(error => {
+                    showAlert(claudeAlert, 'Error: ' + error.message, 'danger');
+                })
+                .finally(() => {
+                    // Hide spinner
+                    claudeSpinner.classList.add('hidden');
+                });
+            });
+            
+            // Utility function for alerts
+            function showAlert(element, message, type) {
+                element.innerHTML = message;
+                element.className = `alert alert-${type}`;
+                element.classList.remove('hidden');
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
