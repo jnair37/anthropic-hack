@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # setting up the Claude client
-client = anthropic.Anthropic(api_key=os.getenv("A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"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # helper function to send prompt and get a response
 def call_claude(prompt, system_msg="You are a resume reviewer."):
