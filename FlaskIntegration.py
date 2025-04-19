@@ -31,19 +31,19 @@ def upload_pdf():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     
-    if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() == 'pdf':
+    # if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() == 'pdf':
         # Process the PDF
-        redacted_text = redact_pdf(file)
-       
-        # Create a response with the redacted text and statistics
-        response = {
-            'redacted_text': redacted_text,
-            'auto_switch_tab': True  # Flag to trigger automatic tab switch
-        }
-        
-        return jsonify(response)
+    redacted_text = redact_pdf(file)
     
-    return jsonify({'error': 'File must be a PDF'}), 400
+    # Create a response with the redacted text and statistics
+    response = {
+        'redacted_text': redacted_text,
+        'auto_switch_tab': True  # Flag to trigger automatic tab switch
+    }
+    
+    return jsonify(response)
+    
+    # return jsonify({'error': 'File must be a PDF'}), 400
 
 
 @app.route('/download', methods=['POST'])

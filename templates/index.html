@@ -138,7 +138,7 @@
                 <!-- Upload Tab -->
                 <div class="tab-pane fade show active" id="upload" role="tabpanel" aria-labelledby="upload-tab">
                     <div class="alert alert-info hidden" id="uploadAlert" role="alert"></div>
-                    <form id="uploadForm">
+                    <form id="uploadForm" enctype="multipart/form-data" method="POST">
                         <label for="pdfFileInput" class="custom-file-upload">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#6c757d" class="bi bi-file-earmark-pdf mb-3" viewBox="0 0 16 16">
                                 <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
@@ -270,19 +270,22 @@
             uploadForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                if (!pdfFileInput.files || pdfFileInput.files.length === 0) {
-                    showAlert(uploadAlert, 'Please select a PDF file first.', 'warning');
-                    return;
-                }
-                
+                // <!-- 
+                // if (!pdfFileInput.files || pdfFileInput.files.length === 0) {
+                    // showAlert(uploadAlert, 'Please select a PDF file first.', 'warning');
+                   // return;
+              //  }
+                // -->
                 const formData = new FormData();
                 formData.append('pdf_file', pdfFileInput.files[0]);
                 
                 // Show loading state
-                uploadButton.disabled = true;
-                uploadSpinner.classList.remove('hidden');
-                uploadButton.textContent = ' Processing...';
-                uploadSpinner.parentNode.insertBefore(uploadSpinner, uploadButton.firstChild);
+
+                // uploadButton.disabled = true;
+                // uploadSpinner.classList.remove('hidden');
+                // uploadButton.textContent = ' Processing...';
+               //  uploadSpinner.parentNode.insertBefore(uploadSpinner, uploadButton.firstChild); 
+                
                 
                 fetch('/upload', {
                     method: 'POST',
