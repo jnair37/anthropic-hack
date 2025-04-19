@@ -33,19 +33,11 @@ def upload_pdf():
     
     if file and '.' in file.filename and file.filename.rsplit('.', 1)[1].lower() == 'pdf':
         # Process the PDF
-        redacted_text, replacements = redact_pdf(file)
-        
-        # Count by type
-        type_counts = {}
-        for replacement in replacements.values():
-            type_name = replacement.split('_')[0][1:]  # Extract type name from [TYPE_X]
-            type_counts[type_name] = type_counts.get(type_name, 0) + 1
-        
+        redacted_text = redact_pdf(file)
+       
         # Create a response with the redacted text and statistics
         response = {
-            'redacted_text': redacted_text,
-            'replacements_count': len(replacements),
-            'type_counts': type_counts
+            'redacted_text': redacted_text
         }
         
         return jsonify(response)
