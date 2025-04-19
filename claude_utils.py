@@ -2,7 +2,7 @@
 import anthropic
 import os
 from dotenv import load_dotenv
-from prompts import feedback_prompt
+from prompts import full_review_prompt
 
 # loading the .env file where your key is stored
 load_dotenv()
@@ -30,6 +30,7 @@ def call_claude(prompt, system_msg="You are a resume reviewer. Also, we know the
         return "Claude is not responding right now. Please try again."
     
     
-def get_resume_feedback(resume_text):
-    prompt = feedback_prompt(resume_text)
+def get_full_resume_review(resume_text, jd_text):
+    prompt = full_review_prompt(resume_text, jd_text)
     return call_claude(prompt)
+
