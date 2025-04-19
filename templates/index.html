@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Resume Redaction Tool</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            .container { max-width: 800px; margin-top: 30px; }
+            #redacted-text { height: 400px; }
+            .hidden { display: none; }
+            .loading { text-align: center; padding: 20px; }
+            .spinner-border { width: 3rem; height: 3rem; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="mb-4">Resume Redaction Tool</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">Upload Resume</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results" type="button" role="tab">Results</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="upload" role="tabpanel">
+                            <p class="card-text">Upload a resume PDF to redact personal information:</p>
+                            <form id="upload-form" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <input class="form-control" type="file" id="pdf-file" name="pdf_file" accept=".pdf">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Process Resume</button>
+                            </form>
+                            
+                            <div id="loading" class="loading hidden">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">Processing PDF...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-pane fade" id="results" role="tabpanel">
+                            <div id="results-container">
+                                <div id="stats-container" class="mb-3">
+                                    <h4>Redaction Statistics</h4>
+                                    <div id="stats-content"></div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="redacted-text" class="form-label">Redacted Text</label>
+                                    <textarea class="form-control" id="redacted-text" readonly></textarea>
+                                </div>
+                                
+                                <button id="download-btn" class="btn btn-success">Download Redacted Text</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const uploadForm = document.getElementById('upload-form');
+                const pdfFileInput = document.getElementById('pdf-file');
+                const loadingDiv = document.getElementById('loading');
+                const resultsTab = document.getElementById('results-tab');
+                const redactedTextArea = document.getElementById('redacted-text');
+                const statsContent = document.getElementById('stats-content');
+                const downloadBtn = document.getElementById('download-btn');
+                
+                uploadForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData();
+                    formData.append('pdf_file', pdfFileInput.files[0]);
+                    
+                    // Show loading spinner
+                    loadingDiv.classList.remove('hidden');
+                    
+                    fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+                        
+                        // Hide loading spinner
+                        loadingDiv.classList.add('hidden');
+                        
+                        // Populate results
+                        redactedTextArea.value = data.redacted_text;
+                        
+                        // Populate statistics
+                        let statsHtml = `<p>Total items redacted: ${data.replacements_count}</p><ul>`;
+                        for (const [type, count] of Object.entries(data.type_counts)) {
+                            statsHtml += `<li>${type}: ${count} items</li>`;
+                        }
+                        statsHtml += '</ul>';
+                        statsContent.innerHTML = statsHtml;
+                        
+                        // Switch to results tab
+                        resultsTab.click();
+                    })
+                    .catch(error => {
+                        loadingDiv.classList.add('hidden');
+                        alert('An error occurred: ' + error);
+                    });
+                });
+                
+                downloadBtn.addEventListener('click', function() {
+                    const formData = new FormData();
+                    formData.append('text', redactedTextArea.value);
+                    
+                    fetch('/download', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = 'redacted_text.txt';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(error => alert('Download failed: ' + error));
+                });
+            });
+        </script>
+    </body>
+    </html>
