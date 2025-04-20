@@ -212,7 +212,7 @@ def end_interview():
         )
         
         return jsonify({
-            'feedback': response.content[0].text,
+            'feedback': clean_claude_response(response.content[0].text),
             'success': True
         })
     except Exception as e:
