@@ -28,7 +28,7 @@ def upload_pdf():
         return jsonify({'error': 'No file part'}), 400
     
     file = request.files['pdf_file']
-    jd_text = request.form["job_desc"]
+    jd_text = request.form["jd_text"]
     
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
