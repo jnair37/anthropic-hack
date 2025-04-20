@@ -31,11 +31,6 @@ well with the job requirements.
 job description, while maintaining truthfulness. This may include rephrasing certain 
 accomplishments or highlighting specific skills.
 
-4. Calculate a parseability score for the resume. Start with a score of 100 and 
-deduct points for any unclear, jumbled, or error-ridden text. The deduction 
-should be proportional to the amount of non-understandable characters or content. 
-Keep track of your reasoning for any deductions.
-
 Organize your analysis and suggestions in the following format:
 
 <analysis>
@@ -52,16 +47,6 @@ why each is relevant to the job description]
 [Offer specific suggestions for tailoring the wording or framing of the resume, 
 ensuring that all suggestions maintain truthfulness]
 </tailoring_suggestions>
-
-<parseability_score_reasoning>
-[Explain your reasoning for any deductions from the parseability score, citing 
-specific issues in the resume]
-</parseability_score_reasoning>
-
-<parseability_score>
-[Provide the final parseability score as a number out of 100]
-</parseability_score>
-</analysis>
 
 Remember to be constructive and specific in your feedback, providing clear 
 explanations for your suggestions and assessments.
