@@ -220,4 +220,4 @@ def end_interview():
         return jsonify({'error': str(e), 'success': False}), 500
 
 if __name__ == '__main__':
-    app.run(port=1500, debug=True)
+    app.run(debug=True)

@@ -5,7 +5,7 @@ PrivaCV is a webapp that uses AI to help candidates receive resume feedback and 
 
 ## Overview
 
-Our goal is to help make resume feedback more accessible while providing a convenient way to privatize personal information. Therefore, PrivaCV is designed to help job seekers improve their resume and interview skills through a privacy-first approach. The tool allows users to:
+Our goal is to help make resume feedback and interview preparation more accessible while providing a convenient way to privatize personal information. Therefore, PrivaCV is designed to help job seekers improve their resume and interview skills through a privacy-first approach. The tool allows users to:
 
 1. Upload their resume PDF for automatic redaction of personal identifiers
 2. Review and edit the redacted text before analysis
