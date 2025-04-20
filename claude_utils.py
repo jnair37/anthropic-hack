@@ -3,6 +3,8 @@ import anthropic
 import os
 from dotenv import load_dotenv
 from prompts import full_review_prompt
+import re
+import markdown2
 
 # loading the .env file where your key is stored
 load_dotenv(dotenv_path=".env.local")
@@ -35,3 +37,10 @@ def get_full_resume_review(resume_text, jd_text):
     prompt = full_review_prompt(resume_text, jd_text)
     return call_claude(prompt)
 
+
+def clean_claude_response(text: str) -> str:
+    """Convert Claude Markdown-style response to HTML for display."""
+    # Remove any <tags> like <job_fit> and <analysis> that Claude uses
+    cleaned = re.sub(r"</?[\w_]+>", "", text)
+    # Convert Markdown to HTML
+    return markdown2.markdown(cleaned)

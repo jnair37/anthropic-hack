@@ -10,7 +10,7 @@ import re
 from typing import Dict, List, Tuple, Optional, BinaryIO, Union
 from PyPDF2 import PdfReader
 from redactr import redact_pdf
-from claude_utils import get_full_resume_review
+from claude_utils import get_full_resume_review, clean_claude_response
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
@@ -95,7 +95,9 @@ def call_claude_wrapper(redacted_text, jd_text):
     Function to process redacted text with Claude API
     This is a placeholder - implement the actual Claude API call here
     """
-    return get_full_resume_review(redacted_text, jd_text)
+    raw_output = get_full_resume_review(redacted_text, jd_text)
+    return clean_claude_response(raw_output)
+    # return get_full_resume_review(redacted_text, jd_text)
 
     # Implementation would go here - e.g., API call to Claude
     #return f"Claude's analysis of the redacted resume would appear here."
