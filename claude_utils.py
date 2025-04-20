@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from prompts import full_review_prompt
 
 # loading the .env file where your key is stored
-load_dotenv()
+load_dotenv(dotenv_path=".env.local")
 
 # setting up the Claude client
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
@@ -24,6 +24,7 @@ def call_claude(prompt, system_msg="You are a resume reviewer. Also, we know the
             ]
         )
         # return just the useful part
+        print(response)
         return ''.join([block.text for block in response.content if block.type == "text"])
     except Exception as e:
         print(f"[Claude error] {e}")

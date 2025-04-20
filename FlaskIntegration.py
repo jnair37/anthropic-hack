@@ -78,6 +78,7 @@ def download_redacted():
 def process_with_claude():
     redacted_text = request.form.get('redacted_text', '')
     jd_text = request.form.get('job_description', '')
+    print(jd_text)
     if not redacted_text:
         return jsonify({'error': 'No text provided for processing'}), 400
     
@@ -94,7 +95,7 @@ def call_claude_wrapper(redacted_text, jd_text):
     Function to process redacted text with Claude API
     This is a placeholder - implement the actual Claude API call here
     """
-    return f"placeholder"#get_full_resume_review(redacted_text, jd_text)
+    return get_full_resume_review(redacted_text, jd_text)
 
     # Implementation would go here - e.g., API call to Claude
     #return f"Claude's analysis of the redacted resume would appear here."

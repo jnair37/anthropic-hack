@@ -380,6 +380,7 @@
                 
                 const formData = new FormData();
                 formData.append('redacted_text', redactedText);
+                formData.append('job_description', jdText.value);
                 
                 fetch('/process_with_claude', {
                     method: 'POST',
