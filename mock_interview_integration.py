@@ -1,4 +1,5 @@
-# mock_interview.py
+from anthropic import Anthropic
+import os
 from typing import List, Dict, Any
 import json
 
@@ -15,9 +16,6 @@ def conduct_mock_interview(resume_text: str, job_description: str, user_response
     Returns:
         Dict containing the interview response, updated state, and any other relevant information
     """
-    from anthropic import Anthropic
-    import os
-    print("conducting mock interview")
     # Initialize the client
     client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
     
@@ -29,8 +27,6 @@ def conduct_mock_interview(resume_text: str, job_description: str, user_response
             "current_stage": "introduction",
             "stages": ["introduction", "technical", "behavioral", "closing"]
         }
-
-    # print("check 0:", interview_state)
 
     # Create system prompt with context
     system_prompt = f"""
@@ -84,8 +80,6 @@ def conduct_mock_interview(resume_text: str, job_description: str, user_response
     interview_state["messages"].append({"role": "user", "content": user_response if user_response else interviewer_prompt})
     interview_state["messages"].append({"role": "assistant", "content": response.content[0].text})
     
-    # print("check 1:", interview_state)
-
     # Update question count if this was an interviewer question
     if user_response is not None:
         interview_state["question_count"] += 1

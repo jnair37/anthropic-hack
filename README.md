@@ -58,7 +58,7 @@ Our goal is to help make resume feedback and interview preparation more accessib
 
 ## Privacy and Security
 
-This tool prioritizes user privacy and security by redacting personal identifiers commonly found in resumes. This allows privacy-minded job-seekers to easily avoid passing personally identifiable information, like names, addresses, phone numbers, and emails into potential training data. 
+This tool prioritizes user privacy and security by redacting personal identifiers commonly found in resumes. This allows privacy-minded job-seekers to easily avoid passing personally identifiable information, like names, addresses, phone numbers, and emails into potential training data.
 
 ## Technical Details
 This project was built using:
@@ -67,7 +67,10 @@ This project was built using:
 - HTML/CSS/Bootstrap
 
 ## Deployment
-This project can be downloaded and run locally.
+This project can be downloaded and run locally. Setup instructions are as follows:
+
+   1. Install relevant dependencies with `pip install -r requirements.txt`.
+   2. Run the app locally with `flask --app privacv run`.
 
 ## Future Enhancements
 In the future, we hope to enhance our redaction process and test out more use cases to make it more robust. We also hope to provide more functionality, such as cover letter help, technical interview practice, and web deployment.

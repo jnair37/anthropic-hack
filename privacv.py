@@ -174,7 +174,6 @@ def end_interview():
     """End the current interview session and get feedback"""
     try:
         # Clear session data
-        print("clearing session data")
         interview_state = session.pop('interview_state', None)
         resume_text = session.pop('resume_text', None)
         jd_text = session.pop('job_description', None)
@@ -185,7 +184,6 @@ def end_interview():
         client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         
         # Extract conversation history
-        print("extracting conversation")
         messages = interview_state["messages"]
         
         feedback_prompt = f"""
