@@ -24,9 +24,6 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
 app.config["SESSION_TYPE"] = "filesystem"  # Store sessions on server filesystem
-# app.config["SESSION_FILE_DIR"] = tempfile.gettempdir()  # Set directory for session files
-# app.config["SESSION_PERMANENT"] = True  # Make sessions permanent
-# app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=5)  # Set session lifetime
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
@@ -103,13 +100,6 @@ def process_with_claude():
     except Exception as e:
         return jsonify({'error': str(e), 'success': False}), 500
 
-# @app.route('/mock_iv', methods=['POST'])
-# def call_mock_iv():
-#     """ Conduct a mock interview w/ Claude """
-#     redacted_text = request.form.get('redacted_text', '')
-#     jd_text = request.form.get('job_description', '')
-#     conduct_mock_interview(redacted_text, jd_text)
-
 def call_claude_wrapper(redacted_text, jd_text):
     """
     Function to process redacted text with Claude API
@@ -117,10 +107,6 @@ def call_claude_wrapper(redacted_text, jd_text):
     """
     raw_output = get_full_resume_review(redacted_text, jd_text)
     return clean_claude_response(raw_output)
-    # return get_full_resume_review(redacted_text, jd_text)
-
-    # Implementation would go here - e.g., API call to Claude
-    #return f"Claude's analysis of the redacted resume would appear here."
 
 @app.route('/start_interview', methods=['POST'])
 def start_interview():
@@ -134,9 +120,6 @@ def start_interview():
     try:
         # Start new interview without user response (initial greeting)
         interview_response = conduct_mock_interview(redacted_text, jd_text)
-        # print(interview_response)
-        # print("-----------------")
-        # print("supposed to be empty:", session)
         # Store interview state in session
         session['interview_state'] = interview_response['interview_state']
         session['resume_text'] = redacted_text
@@ -189,7 +172,6 @@ def continue_interview():
 @app.route('/end_interview', methods=['POST'])
 def end_interview():
     """End the current interview session and get feedback"""
-    print("ending interview")
     try:
         # Clear session data
         print("clearing session data")
@@ -229,8 +211,6 @@ def end_interview():
             ]
         )
         
-        print("claude is amazing")
-
         return jsonify({
             'feedback': response.content[0].text,
             'success': True
@@ -240,4 +220,4 @@ def end_interview():
         return jsonify({'error': str(e), 'success': False}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=1500, debug=True)
