@@ -18,7 +18,7 @@ def call_claude(prompt, system_msg="You are a resume reviewer. Also, we know the
         # claude message call (you can change model, temp, etc.)
         response = client.messages.create(
             model="claude-3-7-sonnet-20250219",
-            max_tokens=1024,
+            max_tokens=4000,
             temperature=0.7,
             system=system_msg,
             messages=[
