@@ -156,8 +156,7 @@
                         </div>
                         <div class="form-group mt-4">
                             <label for="jd_text"><strong>Job Description</strong></label>
-                            <textarea class="form-control" id="jd_text" name="jd_text" rows="5" 
-                                      placeholder="Paste the job description here for more tailored feedback..."></textarea>
+                            <textarea class="form-control" id="jd_text" name="jd_text" rows="5" placeholder="Paste the job description here for more tailored feedback..."></textarea>
                             <small class="form-text text-muted">Adding a job description will help Claude provide more targeted resume feedback.</small>
                         </div>
                     </form>
@@ -199,6 +198,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const uploadForm = document.getElementById('uploadForm');
             const pdfFileInput = document.getElementById('pdfFileInput');
+            const jdText = document.getElementById('jd_text');
             const textArea = document.getElementById('textArea');
             const uploadButton = document.getElementById('uploadButton');
             const uploadSpinner = document.getElementById('uploadSpinner');
@@ -284,6 +284,7 @@
                 // -->
                 const formData = new FormData();
                 formData.append('pdf_file', pdfFileInput.files[0]);
+                formData.append('jd_text', jdText.value);
                 
                 // Show loading state
 

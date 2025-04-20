@@ -29,6 +29,7 @@ def upload_pdf():
     
     file = request.files['pdf_file']
     jd_text = request.form["jd_text"]
+    #print(jd_text)
     
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
@@ -93,7 +94,7 @@ def call_claude_wrapper(redacted_text, jd_text):
     Function to process redacted text with Claude API
     This is a placeholder - implement the actual Claude API call here
     """
-    return get_full_resume_review(redacted_text, jd_text)
+    return f"placeholder"#get_full_resume_review(redacted_text, jd_text)
 
     # Implementation would go here - e.g., API call to Claude
     #return f"Claude's analysis of the redacted resume would appear here."
