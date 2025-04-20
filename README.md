@@ -59,21 +59,6 @@ This tool prioritizes user privacy and security by redacting personal identifier
 
 ## Technical Details
 
-The application is built with:
-- Python backend with Flask
-- Bootstrap 5 frontend
-- Claude AI API integration
-- PDF text extraction capabilities
-
 ## Deployment
 
-The application can be run locally. See installation instructions for details.
-
 ## Future Enhancements
-
-Planned improvements include:
-- Additional resume formats support (DOCX, HTML)
-- Custom redaction rules
-- Resume formatting and design feedback
-- Industry-specific interview preparation
-- Multilingual support
