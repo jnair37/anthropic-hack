@@ -1,6 +1,8 @@
 # PrivaCV
 ### By Jade Nair, Karina Chung, and Zainab Adamji
 
+![Alt text](img/Mock_interview.png)
+
 PrivaCV is a webapp that uses AI to help candidates receive resume feedback and take mock interviews, while avoiding the risks of sending personal information to a large language model.
 
 ## Overview
