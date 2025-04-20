@@ -224,12 +224,6 @@
                         <button class="btn btn-secondary" id="downloadButton">Download as Text</button>
                         <button class="btn btn-primary" id="approveButton">Approve and Send to Claude</button>
                     </div>
-                    <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="start-interview-checkbox">
-                        <label class="form-check-label" for="start-interview-checkbox">
-                            Start mock interview after Claude analysis
-                        </label>
-                    </div>
                 </div>
                 
                 <!-- Claude Analysis Tab -->
@@ -244,6 +238,13 @@
                             <p class="mt-3">Processing with Claude...</p>
                         </div>
                         <div id="claude-response" class="mt-3"></div>
+                    </div>
+                    <div class="form-check mt-3">
+                        <button class="btn btn-primary" id="start-interview-checkbox">Start Mock Interview</button>
+                        <!-- <input class="form-check-input" type="checkbox" id="start-interview-checkbox">
+                        <label class="form-check-label" for="start-interview-checkbox">
+                            Start mock interview after Claude analysis
+                        </label> -->
                     </div>
                 </div>
 
@@ -330,6 +331,7 @@
             const feedbackContent = document.getElementById('feedback-content');
             const newInterviewBtn = document.getElementById('new-interview-btn');
             const interviewAlert = document.getElementById('interviewAlert');
+            const moveToIVBtn = document.getElementById('start-interview-checkbox');
 
             // Handle file selection UI
             const customFileUpload = document.querySelector('.custom-file-upload');
@@ -763,15 +765,9 @@
             interviewMessages.scrollTop = interviewMessages.scrollHeight;
         }
         
-        // Automatically switch to the interview tab when "Start Interview" is clicked from other tabs
-        approveButton.addEventListener('click', function() {
-            // Add conditional to also start interview if checkbox is checked
-            if (document.getElementById('start-interview-checkbox').checked) {
-                setTimeout(function() {
-                    interviewTabObj.show();
-                    startInterviewBtn.click();
-                }, 1000); // Delay to allow Claude tab processing to complete
-            }
+        moveToIVBtn.addEventListener('click', function() {
+            interviewTabObj.show();
+            startInterviewBtn.click();
         });
 
         });
