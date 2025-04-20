@@ -58,7 +58,16 @@ Our goal is to help make resume feedback more accessible while providing a conve
 This tool prioritizes user privacy and security by redacting personal identifiers commonly found in resumes. This allows privacy-minded job-seekers to easily avoid passing personally identifiable information, like names, addresses, phone numbers, and emails into potential training data. 
 
 ## Technical Details
+This project was built using:
+- Claude API
+- Python/Flask
+- HTML/CSS/Bootstrap
 
 ## Deployment
+This project can be downloaded and run locally.
 
 ## Future Enhancements
+In the future, we hope to enhance our redaction process and test out more use cases to make it more robust. We also hope to provide more functionality, such as cover letter help and technical interview practice.
+
+## Acknowledgments
+Thank you to the Anthropic and WiCS team that made this hackathon happen! We had so much fun building this weekend `:)` 
