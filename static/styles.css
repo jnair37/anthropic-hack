@@ -1,16 +1,8 @@
-body {
+/* body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f8f9fa;
-}
-.streamlit-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .main-header {
     font-size: 2.5rem;
@@ -181,7 +173,116 @@ body {
     animation: spin 1s linear infinite;
     margin: 20px auto;
 }
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+} */
+
+/* body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #343a40;
 }
+.container {
+    max-width: 900px;
+    padding: 30px 15px;
+}
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    border: none;
+}
+.card-header {
+    background-color: #4a89dc;
+    color: white;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 15px 20px;
+    font-weight: 600;
+}
+.nav-tabs {
+    border-bottom: none;
+    padding: 0 10px;
+}
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    border-radius: 5px 5px 0 0;
+    padding: 10px 20px;
+    margin-right: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.nav-tabs .nav-link:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+.nav-tabs .nav-link.active {
+    color: #4a89dc;
+    background-color: white;
+    border-bottom: 3px solid #4a89dc;
+}
+.form-control {
+    border-radius: 6px;
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+}
+.btn-primary {
+    background-color: #4a89dc;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    background-color: #3a70c0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+#textArea {
+    min-height: 300px;
+    font-family: monospace;
+}
+.custom-file-upload {
+    display: block;
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.custom-file-upload:hover {
+    border-color: #4a89dc;
+    background-color: #e9ecef;
+}
+.hidden {
+    display: none;
+}
+.spinner-border {
+    margin-right: 8px;
+}
+.alert {
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+#resultPane {
+    background-color: #f8f9fc;
+    border-radius: 6px;
+    padding: 15px;
+    white-space: pre-wrap;
+    font-family: monospace;
+}
+.tab-content {
+    padding: 20px;
+    background-color: white;
+    border-radius: 0 0 10px 10px;
+}
+#claude-response {
+    padding: 15px;
+    background-color: #f0f4f8;
+    border-radius: 6px;
+    white-space: pre-wrap;
+} */
