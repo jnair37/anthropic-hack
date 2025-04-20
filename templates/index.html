@@ -180,6 +180,9 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="claude-tab" data-bs-toggle="tab" data-bs-target="#claude" type="button" role="tab" aria-controls="claude" aria-selected="false">Claude Analysis</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="interview-tab" data-bs-toggle="tab" data-bs-target="#interview" type="button" role="tab" aria-controls="interview" aria-selected="false">Mock Interview</button>
+                </li>
             </ul>
             
             <div class="tab-content" id="myTabContent">
@@ -239,17 +242,41 @@
                 </div>
 
                 <!-- Claude Mock IV Tab -->
-                <div class="tab-pane fade" id="claude-2" role="tabpanel" aria-labelledby="claude-tab-2">
-                    <div class="alert alert-info hidden" id="claudeAlert-2" role="alert"></div>
-                    <div class="mb-3">
-                        <h4>Claude's Analysis</h4>
-                        <div id="claude-spinner-2" class="text-center my-5 hidden">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                            <p class="mt-3">Processing with Claude...</p>
+                <div class="tab-pane fade" id="interview" role="tabpanel" aria-labelledby="interview-tab">
+                    <div class="alert alert-info hidden" id="interviewAlert" role="alert"></div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Mock Job Interview</h5>
+                            <button class="btn btn-sm btn-light" id="startInterviewBtn">Start New Interview</button>
                         </div>
-                        <div id="claude-response" class="mt-3"></div>
+                        <div class="card-body">
+                            <div id="interview-instructions" class="mb-4">
+                                <p class="lead">Practice for your upcoming job interview with our AI-powered mock interview system.</p>
+                                <p>The system will use your redacted resume and the job description to create a realistic interview experience. Click "Start New Interview" to begin.</p>
+                            </div>
+                            
+                            <div id="interview-container" class="hidden">
+                                <div id="interview-messages" class="mb-4" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px;">
+                                    <!-- Messages will be added here dynamically -->
+                                </div>
+                                
+                                <div class="input-group">
+                                    <textarea id="user-response" class="form-control" placeholder="Type your response here..." rows="3"></textarea>
+                                    <button class="btn btn-primary" type="button" id="send-response">Send</button>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-3">
+                                    <button class="btn btn-secondary" id="end-interview-btn">End Interview & Get Feedback</button>
+                                </div>
+                            </div>
+                            
+                            <div id="interview-feedback" class="mt-4 hidden">
+                                <h5>Interview Feedback</h5>
+                                <div id="feedback-content" class="p-3 bg-light rounded"></div>
+                                <button class="btn btn-primary mt-3" id="new-interview-btn">Start New Interview</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -283,6 +310,21 @@
             const redactTabObj = new bootstrap.Tab(redactTab);
             const claudeTabObj = new bootstrap.Tab(claudeTab);
             
+            // Mock Interview elements
+            const interviewTab = document.getElementById('interview-tab');
+            const interviewTabObj = new bootstrap.Tab(interviewTab);
+            const startInterviewBtn = document.getElementById('startInterviewBtn');
+            const interviewContainer = document.getElementById('interview-container');
+            const interviewInstructions = document.getElementById('interview-instructions');
+            const interviewMessages = document.getElementById('interview-messages');
+            const userResponseInput = document.getElementById('user-response');
+            const sendResponseBtn = document.getElementById('send-response');
+            const endInterviewBtn = document.getElementById('end-interview-btn');
+            const interviewFeedback = document.getElementById('interview-feedback');
+            const feedbackContent = document.getElementById('feedback-content');
+            const newInterviewBtn = document.getElementById('new-interview-btn');
+            const interviewAlert = document.getElementById('interviewAlert');
+
             // Handle file selection UI
             const customFileUpload = document.querySelector('.custom-file-upload');
             
@@ -476,6 +518,256 @@
                     element.classList.add('hidden');
                 }, 5000);
             }
+
+
+            // Add click handler for "Start New Interview" button
+        startInterviewBtn.addEventListener('click', function() {
+            // Hide instructions and show interview container
+            interviewInstructions.classList.add('hidden');
+            interviewContainer.classList.remove('hidden');
+            interviewFeedback.classList.add('hidden');
+            
+            // Clear previous messages
+            interviewMessages.innerHTML = '';
+            
+            // Start new interview
+            startInterview();
+        });
+        
+        // Add click handler for "Send" button
+        sendResponseBtn.addEventListener('click', function() {
+            sendUserResponse();
+        });
+        
+        // Allow Enter key to send response (Shift+Enter for new line)
+        userResponseInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendUserResponse();
+            }
+        });
+        
+        // End interview and get feedback
+        endInterviewBtn.addEventListener('click', function() {
+            getInterviewFeedback();
+        });
+        
+        // Start new interview after feedback
+        newInterviewBtn.addEventListener('click', function() {
+            interviewInstructions.classList.add('hidden');
+            interviewContainer.classList.remove('hidden');
+            interviewFeedback.classList.add('hidden');
+            interviewMessages.innerHTML = '';
+            startInterview();
+        });
+        
+        // Function to start a new interview
+        function startInterview() {
+            // Show loading message
+            addSystemMessage('Starting interview...');
+            
+            const formData = new FormData();
+            formData.append('redacted_text', textArea.value);
+            formData.append('job_description', jdText.value);
+            
+            fetch('/start_interview', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to start interview');
+                }
+                
+                // Remove loading message
+                interviewMessages.innerHTML = '';
+                
+                // Add interviewer's initial message
+                addInterviewerMessage(data.interviewer_message);
+                
+                // Enable user input
+                userResponseInput.disabled = false;
+                sendResponseBtn.disabled = false;
+                
+                showAlert(interviewAlert, 'Interview started! Respond to the interviewer\'s questions.', 'success');
+            })
+            .catch(error => {
+                showAlert(interviewAlert, 'Error: ' + error.message, 'danger');
+            });
+        }
+        
+        // Function to send user response
+        function sendUserResponse() {
+            const userResponse = userResponseInput.value.trim();
+            
+            if (!userResponse) {
+                return;
+            }
+            
+            // Add user message to the chat
+            addUserMessage(userResponse);
+            
+            // Clear input
+            userResponseInput.value = '';
+            
+            // Disable input while waiting for response
+            userResponseInput.disabled = true;
+            sendResponseBtn.disabled = true;
+            
+            // Add typing indicator
+            addSystemMessage('Interviewer is typing...');
+            
+            const formData = new FormData();
+            formData.append('user_response', userResponse);
+            
+            fetch('/continue_interview', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to continue interview');
+                }
+                
+                // Remove typing indicator
+                removeLastMessage();
+                
+                // Add interviewer response
+                addInterviewerMessage(data.interviewer_message);
+                
+                // Re-enable user input
+                userResponseInput.disabled = false;
+                sendResponseBtn.disabled = false;
+                userResponseInput.focus();
+            })
+            .catch(error => {
+                showAlert(interviewAlert, 'Error: ' + error.message, 'danger');
+                
+                // Re-enable user input on error
+                userResponseInput.disabled = false;
+                sendResponseBtn.disabled = false;
+            });
+        }
+        
+        // Function to get interview feedback
+        function getInterviewFeedback() {
+            // Disable input
+            userResponseInput.disabled = true;
+            sendResponseBtn.disabled = true;
+            endInterviewBtn.disabled = true;
+            
+            // Add loading message
+            addSystemMessage('Generating feedback...');
+            
+            fetch('/end_interview', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to get interview feedback');
+                }
+                
+                // Remove loading message
+                removeLastMessage();
+                
+                // Hide interview container and show feedback
+                interviewContainer.classList.add('hidden');
+                interviewFeedback.classList.remove('hidden');
+                
+                // Set feedback content
+                feedbackContent.innerHTML = formatMessage(data.feedback);
+                
+                showAlert(interviewAlert, 'Interview completed! Review your feedback.', 'success');
+            })
+            .catch(error => {
+                showAlert(interviewAlert, 'Error: ' + error.message, 'danger');
+                
+                // Re-enable buttons on error
+                userResponseInput.disabled = false;
+                sendResponseBtn.disabled = false;
+                endInterviewBtn.disabled = false;
+            });
+        }
+        
+        // Helper functions for message display
+        function addInterviewerMessage(message) {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'mb-3';
+            messageEl.innerHTML = `
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="fw-bold">Interviewer</div>
+                        <div class="message-content">${formatMessage(message)}</div>
+                    </div>
+                </div>
+            `;
+            interviewMessages.appendChild(messageEl);
+            scrollToBottom();
+        }
+        
+        function addUserMessage(message) {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'mb-3 text-end';
+            messageEl.innerHTML = `
+                <div class="d-flex justify-content-end">
+                    <div class="flex-grow-1 me-3">
+                        <div class="fw-bold">You</div>
+                        <div class="message-content text-start">${formatMessage(message)}</div>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            interviewMessages.appendChild(messageEl);
+            scrollToBottom();
+        }
+        
+        function addSystemMessage(message) {
+            const messageEl = document.createElement('div');
+            messageEl.className = 'text-center text-muted my-3 system-message';
+            messageEl.textContent = message;
+            interviewMessages.appendChild(messageEl);
+            scrollToBottom();
+        }
+        
+        function removeLastMessage() {
+            const systemMessages = interviewMessages.querySelectorAll('.system-message');
+            if (systemMessages.length > 0) {
+                systemMessages[systemMessages.length - 1].remove();
+            }
+        }
+        
+        function formatMessage(message) {
+            // Convert newlines to <br> tags
+            return message.replace(/\n/g, '<br>');
+        }
+        
+        function scrollToBottom() {
+            interviewMessages.scrollTop = interviewMessages.scrollHeight;
+        }
+        
+        // Automatically switch to the interview tab when "Start Interview" is clicked from other tabs
+        approveButton.addEventListener('click', function() {
+            // Add conditional to also start interview if checkbox is checked
+            if (document.getElementById('start-interview-checkbox').checked) {
+                setTimeout(function() {
+                    interviewTabObj.show();
+                    startInterviewBtn.click();
+                }, 1000); // Delay to allow Claude tab processing to complete
+            }
+        });
+
         });
     </script>
 </body>
