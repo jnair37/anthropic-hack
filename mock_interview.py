@@ -1,12 +1,12 @@
 import os
 import json
 import anthropic
+from dotenv import load_dotenv
 from typing import Optional, Dict, Any, List
 
 def conduct_mock_interview(
-    api_key: str,
-    resume_path: str,
-    job_description_path: str,
+    resume_content: str,
+    job_description_content: str,
     model: str = "claude-3-7-sonnet-20250219"
 ) -> None:
     """
@@ -18,15 +18,11 @@ def conduct_mock_interview(
         job_description_path: Path to the job description file (PDF or text)
         model: Claude model to use (defaults to Claude 3.7 Sonnet)
     """
-    # Initialize the client
-    client = anthropic.Anthropic(api_key=api_key)
-    
-    # Load resume and job description
-    with open(resume_path, 'r', encoding='utf-8') as f:
-        resume_content = f.read()
-    
-    with open(job_description_path, 'r', encoding='utf-8') as f:
-        job_description_content = f.read()
+    # Load dotenv
+    load_dotenv(dotenv_path=".env.local")
+
+    # setting up the Claude client
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     
     # Setup context using Model Context Protocol
     context = [
@@ -77,7 +73,7 @@ def conduct_mock_interview(
                 system=system_prompt,
                 messages=messages,
                 context=context,
-                max_tokens=2000
+                max_tokens=1024
             )
             
             # Display Claude's message (interview question or feedback)
