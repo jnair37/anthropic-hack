@@ -68,7 +68,7 @@ This project was built using:
 This project can be downloaded and run locally.
 
 ## Future Enhancements
-In the future, we hope to enhance our redaction process and test out more use cases to make it more robust. We also hope to provide more functionality, such as cover letter help and technical interview practice.
+In the future, we hope to enhance our redaction process and test out more use cases to make it more robust. We also hope to provide more functionality, such as cover letter help, technical interview practice, and web deployment.
 
 ## Acknowledgments
 Thank you to the Anthropic and WiCS team that made this hackathon happen! We had so much fun building this weekend `:)` 
