@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, send_file, jsonify, make_response
+from flask import Flask, render_template, session, request, send_file, jsonify, make_response
+from flask_session import Session
+
 import os
 import io
 import tempfile
@@ -11,12 +13,24 @@ from typing import Dict, List, Tuple, Optional, BinaryIO, Union
 from PyPDF2 import PdfReader
 from redactr import redact_pdf
 from claude_utils import get_full_resume_review, clean_claude_response
-from mock_interview import conduct_mock_interview
+from mock_interview_integration import conduct_mock_interview
+from anthropic import Anthropic
+
+from dotenv import load_dotenv
+load_dotenv(dotenv_path=".env.local")
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp()
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload size
+app.config["SESSION_TYPE"] = "filesystem"  # Store sessions on server filesystem
+# app.config["SESSION_FILE_DIR"] = tempfile.gettempdir()  # Set directory for session files
+# app.config["SESSION_PERMANENT"] = True  # Make sessions permanent
+# app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=5)  # Set session lifetime
 
+app.secret_key = os.environ.get("FLASK_SECRET_KEY")
+
+Session(app)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -78,7 +92,7 @@ def download_redacted():
 def process_with_claude():
     redacted_text = request.form.get('redacted_text', '')
     jd_text = request.form.get('job_description', '')
-    print(jd_text)
+
     if not redacted_text:
         return jsonify({'error': 'No text provided for processing'}), 400
     
@@ -108,6 +122,122 @@ def call_claude_wrapper(redacted_text, jd_text):
     # Implementation would go here - e.g., API call to Claude
     #return f"Claude's analysis of the redacted resume would appear here."
 
+@app.route('/start_interview', methods=['POST'])
+def start_interview():
+    """Initialize a new mock interview session"""
+    redacted_text = request.form.get('redacted_text', '')
+    jd_text = request.form.get('job_description', '')
+
+    if not redacted_text or not jd_text:
+        return jsonify({'error': 'Resume text and job description are required'}), 400
+    
+    try:
+        # Start new interview without user response (initial greeting)
+        interview_response = conduct_mock_interview(redacted_text, jd_text)
+        # print(interview_response)
+        # print("-----------------")
+        # print("supposed to be empty:", session)
+        # Store interview state in session
+        session['interview_state'] = interview_response['interview_state']
+        session['resume_text'] = redacted_text
+        session['job_description'] = jd_text
+        
+        return jsonify({
+            'interviewer_message': interview_response['interviewer_response'],
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route('/continue_interview', methods=['POST'])
+def continue_interview():
+    """Continue an existing interview with user's response"""
+    user_response = request.form.get('user_response', '')
+    
+    if not user_response:
+        return jsonify({'error': 'User response is required'}), 400
+
+    try:
+        # Get interview state from session
+        interview_state = session.get('interview_state')
+        resume_text = session.get('resume_text')
+        jd_text = session.get('job_description')
+        
+        if not interview_state or not resume_text or not jd_text:
+            return jsonify({'error': 'Interview session not found or expired'}), 400
+        
+        # Continue interview with user response
+        interview_response = conduct_mock_interview(
+            resume_text, 
+            jd_text,
+            user_response, 
+            interview_state
+        )
+        
+        # Update interview state in session
+        session['interview_state'] = interview_response['interview_state']
+
+        return jsonify({
+            'interviewer_message': interview_response['interviewer_response'],
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'success': False}), 500
+
+
+@app.route('/end_interview', methods=['POST'])
+def end_interview():
+    """End the current interview session and get feedback"""
+    print("ending interview")
+    try:
+        # Clear session data
+        print("clearing session data")
+        interview_state = session.pop('interview_state', None)
+        resume_text = session.pop('resume_text', None)
+        jd_text = session.pop('job_description', None)
+        
+        if not interview_state or not resume_text or not jd_text:
+            return jsonify({'error': 'No active interview session found'}), 400
+        
+        client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        
+        # Extract conversation history
+        print("extracting conversation")
+        messages = interview_state["messages"]
+        
+        feedback_prompt = f"""
+        # Interview Feedback Request
+        
+        Resume: {resume_text}
+        Job Description: {jd_text}
+        
+        Please provide constructive feedback on this mock interview, including:
+        1. Overall assessment
+        2. Communication strengths
+        3. Areas for improvement
+        4. Alignment with the job requirements
+        """
+        
+        response = client.messages.create(
+            model="claude-3-7-sonnet-20250219",
+            max_tokens=2048,
+            messages=[
+                {"role": "assistant", "content": "You are an expert interview coach providing constructive feedback."},
+                *messages,
+                {"role": "user", "content": feedback_prompt}
+            ]
+        )
+        
+        print("claude is amazing")
+
+        return jsonify({
+            'feedback': response.content[0].text,
+            'success': True
+        })
+    except Exception as e:
+        print(e)
+        return jsonify({'error': str(e), 'success': False}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
